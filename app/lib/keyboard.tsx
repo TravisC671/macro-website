@@ -3,6 +3,7 @@ import { useRpcStore } from "@/lib/store";
 import { KeyPhysicalAttrs } from "@zmkfirmware/zmk-studio-ts-client/keymap";
 import { useEffect } from "react";
 import { useShallow } from "zustand/shallow";
+import Key from "./key";
 
 export default function Keyboard() {
   const { physicalLayouts, selectedLayout } = useRpcStore(
@@ -31,17 +32,7 @@ export default function Keyboard() {
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       {physicalLayouts[selectedLayout].keys.map((attr, idx) => (
-        <Button
-          variant={"outline"}
-          className="absolute"
-          key={`physKeys${idx}`}
-          style={{
-            width: `${attr.width}px`,
-            height: `${attr.height}px`,
-            top: `${attr.y}px`,
-            left: `${attr.x}px`,
-          }}
-        ></Button>
+        <Key attr={attr} idx={idx} key={`physKeys${idx}`} />
       ))}
     </div>
   );

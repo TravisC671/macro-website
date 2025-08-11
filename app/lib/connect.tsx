@@ -6,26 +6,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { call_rpc, get_hid_data, hid_usage_get_labels } from "@/lib/rpc";
+import { call_rpc } from "@/lib/rpc";
 import { useRpcStore } from "@/lib/store";
-import { create_rpc_connection, Response } from "@zmkfirmware/zmk-studio-ts-client";
+import {
+  create_rpc_connection,
+  Response,
+} from "@zmkfirmware/zmk-studio-ts-client";
 import { connect as serial_connect } from "@zmkfirmware/zmk-studio-ts-client/transport/serial";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
 
-function remove_prefix(s?: string) {
-  return s?.replace(/^Keyboard /, "");
-}
-
 export default function Connect() {
   const [open, setOpen] = useState(true);
 
-  const { setRpcConnection, setPhysicalLayouts, setSelectedLayout } =
+  const { setRpcConnection, setPhysicalLayouts, setSelectedLayout, setKeymap } =
     useRpcStore(
       useShallow((state) => ({
         setPhysicalLayouts: state.setPhysicalLayouts,
         setRpcConnection: state.setRpcConnection,
         setSelectedLayout: state.setSelectedLayout,
+        setKeymap: state.setKeymap,
       }))
     );
 
@@ -42,23 +42,20 @@ export default function Connect() {
 
     if (keymaps) {
       setPhysicalLayouts(keymaps);
+      //todo change this
       setSelectedLayout(0);
     }
 
     setRpcConnection(connection);
 
-    // this is just a test to see how to get the data
     response = await call_rpc(connection, {
-      keymap: { getKeymap: true }
+      keymap: { getKeymap: true },
     });
+  
+    if (response.keymap?.getKeymap) {
+      setKeymap(response.keymap.getKeymap);
+    }
 
-    console.log(response.keymap?.getKeymap?.layers[0].bindings[0])
-
-    let {page, id} = get_hid_data(response.keymap?.getKeymap?.layers[0].bindings[0].param1!)
-
-    let labels =  hid_usage_get_labels(page, id)
-
-    console.log(remove_prefix(labels.short))
     setOpen(false);
   };
 
